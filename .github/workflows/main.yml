@@ -27,7 +27,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: vprofile
-          path: target/*.jar
+          path: target/*.war
 
       - name: notify if Build fails
         if: failure()
