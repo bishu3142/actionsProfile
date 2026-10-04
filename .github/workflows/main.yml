@@ -18,11 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: checking code quality
+      - name: checkout code quality
         uses: actions/checkout@v5
 
       - name: run tests on main branch
         run: mvn test
 
       - name : checkstyles
-        run: mvn checkstyle:check
+        run: mvn checkstyle:checkstyle
