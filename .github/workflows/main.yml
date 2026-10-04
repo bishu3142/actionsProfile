@@ -1,8 +1,7 @@
 name: Build WF
 on:
-  push:
-    branches:
-      - main
+  pull_request:
+    branches: [main]
 
 jobs:
   build:
@@ -10,6 +9,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: run tests on main branch
         run: mvn install
@@ -20,6 +21,8 @@ jobs:
     steps:
       - name: checkout code quality
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: run tests on main branch
         run: mvn test
