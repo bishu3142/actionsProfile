@@ -108,13 +108,38 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build, Tag, and Push Docker image to Amazon ECR
+      - name: Build Docker image
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
-        run: |
+        run:
           docker build -f Docker-files/app/multistage/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+
+      - name: run trivy scan on docker image
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: image
+          scan-ref: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          ignore-unfixed: true
+          format: json
+          exit-code: 0
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          output: trivy-image-report.json
+
+      - name: Upload Security Scan Report
+        uses: actions/upload-artifact@v7
+        with:
+          name: trivy-scan-results
+          path: trivy-image-report.json
+
+      - name: Push Docker image to Amazon ECR
+        id: upload-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
 
